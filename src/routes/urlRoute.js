@@ -6,7 +6,7 @@ import URL from "../models/URL.js";
 const router = express.Router();
 
 router.post("/short", async (req, res) => {
-  const { url } = req.body,
+  const { url, buisnessBaseUrl } = req.body,
     urlId = nanoid();
 
   if (validateUrl(url)) {
@@ -19,7 +19,9 @@ router.post("/short", async (req, res) => {
           data: existUrl,
         });
       } else {
-        const shortUrl = `${process.env.BASE}/${urlId}`;
+        const base_url = buisnessBaseUrl || process.env.BASE || "https://xyz";
+
+        const shortUrl = `${base_url}/${urlId}`;
         const newData = new URL({
           originalUrl: url,
           shortUrl,
@@ -40,6 +42,22 @@ router.post("/short", async (req, res) => {
     res.status(400).send({ msg: "Invalid Original Url", data: null });
   }
 });
+
+/**
+ * @expected res
+ * {
+    "msg": "URL saved!",
+    "data": {
+        "urlId": "iN2qPKlAJlJD45GFbyc-0",
+        "originalUrl": "https://stackoverflow.com/",
+        "shortUrl": "https://brand.xz/iN2qPKlAJlJD45GFbyc-0",
+        "clicks": 0,
+        "_id": "64fc54acccf1cb147e2078bd",
+        "date": "1694258348326",
+        "__v": 0
+    }
+}
+ */
 
 router.get("/visit/:id", async (req, res) => {
   try {
